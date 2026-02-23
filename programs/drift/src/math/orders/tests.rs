@@ -3355,7 +3355,7 @@ mod calculate_max_perp_order_size {
         let btc_perp_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let btc_perp_market_account_info =
             create_account_info(&key, true, &mut lamports, btc_perp_market_bytes, &owner);
@@ -3366,7 +3366,7 @@ mod calculate_max_perp_order_size {
         let jup_perp_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let jup_perp_market_account_info =
             create_account_info(&key, true, &mut lamports, jup_perp_market_bytes, &owner);
@@ -3383,7 +3383,7 @@ mod calculate_max_perp_order_size {
         let usdc_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let usdc_market_account_info =
             create_account_info(&key, true, &mut lamports, usdc_market_bytes, &owner);
@@ -3394,7 +3394,7 @@ mod calculate_max_perp_order_size {
         let sol_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let sol_market_account_info =
             create_account_info(&key, true, &mut lamports, sol_market_bytes, &owner);
@@ -3405,7 +3405,7 @@ mod calculate_max_perp_order_size {
         let eth_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let eth_market_account_info =
             create_account_info(&key, true, &mut lamports, eth_market_bytes, &owner);
@@ -3416,7 +3416,7 @@ mod calculate_max_perp_order_size {
         let btc_market_bytes = decoded_bytes.as_mut_slice();
 
         let key = Pubkey::default();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let btc_market_account_info =
             create_account_info(&key, true, &mut lamports, btc_market_bytes, &owner);
@@ -3549,7 +3549,7 @@ mod calculate_max_perp_order_size {
         let user_bytes = decoded_bytes.as_mut_slice();
 
         let user_key = Pubkey::from_str("5smUuFz1ZzW3FVAF2W1GjYWzxsXQaVyPGdFKfvSnPpaL").unwrap();
-        let owner = Pubkey::from_str("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH").unwrap();
+        let owner = Pubkey::from_str("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko").unwrap();
         let mut lamports = 0;
         let user_account_info =
             create_account_info(&user_key, true, &mut lamports, user_bytes, &owner);

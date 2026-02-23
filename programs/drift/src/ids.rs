@@ -19,6 +19,11 @@ pub mod drift_oracle_receiver_program {
     declare_id!("G6EoTTTgpkNBtVXo96EQp2m6uwwVh2Kt6YidjkmQqoha");
 }
 
+pub mod pyth_receiver_program {
+    use solana_program::declare_id;
+    declare_id!("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
+}
+
 pub mod pyth_lazer_program {
     use solana_program::declare_id;
     declare_id!("pytd2yyk641x7ak7mkaasSJVXh6YYZnC7wTmtgAyxPt");

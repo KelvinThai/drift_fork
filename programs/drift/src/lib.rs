@@ -62,9 +62,9 @@ pub fn program_entry<'info>(
 }
 
 #[cfg(feature = "mainnet-beta")]
-declare_id!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
+declare_id!("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko");
 #[cfg(not(feature = "mainnet-beta"))]
-declare_id!("dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH");
+declare_id!("6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko");
 
 #[program]
 pub mod drift {

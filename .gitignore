@@ -13,3 +13,6 @@ sdk/src/**/*.js.map
 migrations
 /**/*.env
 vendor
+
+# Keypairs — NEVER commit private keys
+keys/

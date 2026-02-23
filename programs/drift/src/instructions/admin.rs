@@ -128,6 +128,33 @@ pub fn handle_initialize(ctx: Context<Initialize>) -> Result<()> {
     Ok(())
 }
 
+/// Create a PDA account via CPI to system program (separate function to isolate stack frame)
+#[inline(never)]
+fn create_pda_account<'info>(
+    payer: &AccountInfo<'info>,
+    target: &AccountInfo<'info>,
+    space: usize,
+    owner: &Pubkey,
+    system_program: &AccountInfo<'info>,
+    seeds: &[&[u8]],
+) -> Result<()> {
+    let rent = Rent::get()?;
+    let lamports = rent.minimum_balance(space);
+    let ix = anchor_lang::solana_program::system_instruction::create_account(
+        payer.key,
+        target.key,
+        lamports,
+        space as u64,
+        owner,
+    );
+    anchor_lang::solana_program::program::invoke_signed(
+        &ix,
+        &[payer.clone(), target.clone(), system_program.clone()],
+        &[seeds],
+    )?;
+    Ok(())
+}
+
 pub fn handle_initialize_spot_market(
     ctx: Context<InitializeSpotMarket>,
     optimal_utilization: u32,
@@ -152,6 +179,41 @@ pub fn handle_initialize_spot_market(
 ) -> Result<()> {
     let state = &mut ctx.accounts.state;
     let spot_market_pubkey = ctx.accounts.spot_market.key();
+
+    // Create vault accounts via CPI (moved out of Anchor init to reduce stack in try_accounts)
+    let market_index_bytes = state.number_of_spot_markets.to_le_bytes();
+    let vault_space = get_vault_len(&ctx.accounts.spot_market_mint)?;
+    let token_program_id = ctx.accounts.token_program.key();
+
+    {
+        let (_, vault_bump) = Pubkey::find_program_address(
+            &[b"spot_market_vault", &market_index_bytes],
+            ctx.program_id,
+        );
+        create_pda_account(
+            &ctx.accounts.admin.to_account_info(),
+            &ctx.accounts.spot_market_vault,
+            vault_space,
+            &token_program_id,
+            &ctx.accounts.system_program.to_account_info(),
+            &[b"spot_market_vault", &market_index_bytes, &[vault_bump]],
+        )?;
+    }
+
+    {
+        let (_, if_vault_bump) = Pubkey::find_program_address(
+            &[b"insurance_fund_vault", &market_index_bytes],
+            ctx.program_id,
+        );
+        create_pda_account(
+            &ctx.accounts.admin.to_account_info(),
+            &ctx.accounts.insurance_fund_vault,
+            vault_space,
+            &token_program_id,
+            &ctx.accounts.system_program.to_account_info(),
+            &[b"insurance_fund_vault", &market_index_bytes, &[if_vault_bump]],
+        )?;
+    }
 
     let is_token_2022 = *ctx.accounts.spot_market_mint.to_account_info().owner == Token2022::id();
     if is_token_2022 {
@@ -285,86 +347,61 @@ pub fn handle_initialize_spot_market(
         )?;
     }
 
-    **spot_market = SpotMarket {
+    // Initialize field-by-field to avoid large stack allocation
+    spot_market.market_index = spot_market_index;
+    spot_market.pubkey = spot_market_pubkey;
+    spot_market.status = if active_status {
+        MarketStatus::Active
+    } else {
+        MarketStatus::Initialized
+    };
+    spot_market.name = name;
+    spot_market.asset_tier = asset_tier;
+    spot_market.expiry_ts = 0;
+    spot_market.oracle = ctx.accounts.oracle.key();
+    spot_market.oracle_source = oracle_source;
+    spot_market.historical_oracle_data = historical_oracle_data_default;
+    spot_market.historical_index_data = historical_index_data_default;
+    spot_market.mint = ctx.accounts.spot_market_mint.key();
+    spot_market.vault = ctx.accounts.spot_market_vault.key();
+    spot_market.revenue_pool = PoolBalance {
+        scaled_balance: 0,
         market_index: spot_market_index,
-        pubkey: spot_market_pubkey,
-        status: if active_status {
-            MarketStatus::Active
-        } else {
-            MarketStatus::Initialized
-        },
-        name,
-        asset_tier,
-        expiry_ts: 0,
-        oracle: ctx.accounts.oracle.key(),
-        oracle_source,
-        historical_oracle_data: historical_oracle_data_default,
-        historical_index_data: historical_index_data_default,
-        mint: ctx.accounts.spot_market_mint.key(),
-        vault: ctx.accounts.spot_market_vault.key(),
-        revenue_pool: PoolBalance {
-            scaled_balance: 0,
-            market_index: spot_market_index,
-            ..PoolBalance::default()
-        }, // in base asset
-        decimals,
-        optimal_utilization,
-        optimal_borrow_rate,
-        max_borrow_rate,
-        deposit_balance: 0,
-        borrow_balance: 0,
-        max_token_deposits: 0,
-        deposit_token_twap: 0,
-        borrow_token_twap: 0,
-        utilization_twap: 0,
-        cumulative_deposit_interest: SPOT_CUMULATIVE_INTEREST_PRECISION,
-        cumulative_borrow_interest: SPOT_CUMULATIVE_INTEREST_PRECISION,
-        total_social_loss: 0,
-        total_quote_social_loss: 0,
-        last_interest_ts: now,
-        last_twap_ts: now,
-        initial_asset_weight,
-        maintenance_asset_weight,
-        initial_liability_weight,
-        maintenance_liability_weight,
-        imf_factor,
-        liquidator_fee,
-        if_liquidation_fee, // 1%
-        withdraw_guard_threshold,
-        order_step_size,
-        order_tick_size,
-        min_order_size: order_step_size,
-        max_position_size: 0,
-        next_fill_record_id: 1,
-        next_deposit_record_id: 1,
-        spot_fee_pool: PoolBalance::default(), // in quote asset
-        total_spot_fee: 0,
-        orders_enabled: spot_market_index != 0,
-        paused_operations: 0,
-        if_paused_operations: 0,
-        fee_adjustment: 0,
-        max_token_borrows_fraction: 0,
-        flash_loan_amount: 0,
-        flash_loan_initial_token_amount: 0,
-        total_swap_fee: 0,
-        scale_initial_asset_weight_start,
-        min_borrow_rate: 0,
-        fuel_boost_deposits: 0,
-        fuel_boost_borrows: 0,
-        fuel_boost_taker: 1,
-        fuel_boost_maker: 1,
-        fuel_boost_insurance: 0,
-        token_program_flag: token_program,
-        pool_id: 0,
-        padding: [0; 40],
-        insurance_fund: InsuranceFund {
-            vault: ctx.accounts.insurance_fund_vault.key(),
-            unstaking_period: THIRTEEN_DAY,
-            total_factor: if_total_factor,
-            user_factor: if_total_factor / 2,
-            revenue_settle_period: 3600,
-            ..InsuranceFund::default()
-        },
+        ..PoolBalance::default()
+    };
+    spot_market.decimals = decimals;
+    spot_market.optimal_utilization = optimal_utilization;
+    spot_market.optimal_borrow_rate = optimal_borrow_rate;
+    spot_market.max_borrow_rate = max_borrow_rate;
+    spot_market.cumulative_deposit_interest = SPOT_CUMULATIVE_INTEREST_PRECISION;
+    spot_market.cumulative_borrow_interest = SPOT_CUMULATIVE_INTEREST_PRECISION;
+    spot_market.last_interest_ts = now;
+    spot_market.last_twap_ts = now;
+    spot_market.initial_asset_weight = initial_asset_weight;
+    spot_market.maintenance_asset_weight = maintenance_asset_weight;
+    spot_market.initial_liability_weight = initial_liability_weight;
+    spot_market.maintenance_liability_weight = maintenance_liability_weight;
+    spot_market.imf_factor = imf_factor;
+    spot_market.liquidator_fee = liquidator_fee;
+    spot_market.if_liquidation_fee = if_liquidation_fee;
+    spot_market.withdraw_guard_threshold = withdraw_guard_threshold;
+    spot_market.order_step_size = order_step_size;
+    spot_market.order_tick_size = order_tick_size;
+    spot_market.min_order_size = order_step_size;
+    spot_market.next_fill_record_id = 1;
+    spot_market.next_deposit_record_id = 1;
+    spot_market.orders_enabled = spot_market_index != 0;
+    spot_market.fuel_boost_taker = 1;
+    spot_market.fuel_boost_maker = 1;
+    spot_market.token_program_flag = token_program;
+    spot_market.scale_initial_asset_weight_start = scale_initial_asset_weight_start;
+    spot_market.insurance_fund = InsuranceFund {
+        vault: ctx.accounts.insurance_fund_vault.key(),
+        unstaking_period: THIRTEEN_DAY,
+        total_factor: if_total_factor,
+        user_factor: if_total_factor / 2,
+        revenue_settle_period: 3600,
+        ..InsuranceFund::default()
     };
 
     Ok(())
@@ -957,157 +994,81 @@ pub fn handle_initialize_perp_market(
         )?;
     }
 
-    **perp_market = PerpMarket {
-        contract_type: ContractType::Perpetual,
-        contract_tier,
-        status: if active_status {
-            MarketStatus::Active
-        } else {
-            MarketStatus::Initialized
-        },
-        name,
-        expiry_price: 0,
-        expiry_ts: 0,
-        pubkey: *perp_market_pubkey,
-        market_index,
-        number_of_users_with_base: 0,
-        number_of_users: 0,
-        margin_ratio_initial, // unit is 20% (+2 decimal places)
-        margin_ratio_maintenance,
-        imf_factor,
-        next_fill_record_id: 1,
-        next_funding_rate_record_id: 1,
-        next_curve_record_id: 1,
-        pnl_pool: PoolBalance::default(),
-        insurance_claim: InsuranceClaim {
-            max_revenue_withdraw_per_period,
-            quote_max_insurance,
-            ..InsuranceClaim::default()
-        },
-        unrealized_pnl_initial_asset_weight: 0, // 100%
-        unrealized_pnl_maintenance_asset_weight: SPOT_WEIGHT_PRECISION.cast()?, // 100%
-        unrealized_pnl_imf_factor: 0,
-        unrealized_pnl_max_imbalance: 0,
-        liquidator_fee,
-        if_liquidation_fee,
-        paused_operations: 0,
-        quote_spot_market_index: QUOTE_SPOT_MARKET_INDEX,
-        fee_adjustment: 0,
-        fuel_boost_position: 0,
-        fuel_boost_taker: 1,
-        fuel_boost_maker: 1,
-        pool_id: 0,
-        high_leverage_margin_ratio_initial: 0,
-        high_leverage_margin_ratio_maintenance: 0,
-        protected_maker_limit_price_divisor: 0,
-        protected_maker_dynamic_divisor: 0,
-        lp_fee_transfer_scalar: 1,
-        lp_status: 0,
-        lp_exchange_fee_excluscion_scalar: 0,
-        lp_paused_operations: 0,
-        last_fill_price: 0,
-        lp_pool_id,
-        padding: [0; 23],
-        amm: AMM {
-            oracle: *ctx.accounts.oracle.key,
-            oracle_source,
-            base_asset_reserve: amm_base_asset_reserve,
-            quote_asset_reserve: amm_quote_asset_reserve,
-            terminal_quote_asset_reserve: amm_quote_asset_reserve,
-            ask_base_asset_reserve: amm_base_asset_reserve,
-            ask_quote_asset_reserve: amm_quote_asset_reserve,
-            bid_base_asset_reserve: amm_base_asset_reserve,
-            bid_quote_asset_reserve: amm_quote_asset_reserve,
-            cumulative_funding_rate_long: 0,
-            cumulative_funding_rate_short: 0,
-            total_social_loss: 0,
-            last_funding_rate: 0,
-            last_funding_rate_long: 0,
-            last_funding_rate_short: 0,
-            last_24h_avg_funding_rate: 0,
-            last_funding_rate_ts: now,
-            funding_period: amm_periodicity,
-            last_mark_price_twap: init_reserve_price,
-            last_mark_price_twap_5min: init_reserve_price,
-            last_mark_price_twap_ts: now,
-            sqrt_k: amm_base_asset_reserve,
-            concentration_coef,
-            min_base_asset_reserve,
-            max_base_asset_reserve,
-            peg_multiplier: amm_peg_multiplier,
-            total_fee: 0,
-            total_fee_withdrawn: 0,
-            total_fee_minus_distributions: 0,
-            total_mm_fee: 0,
-            total_exchange_fee: 0,
-            total_liquidation_fee: 0,
-            net_revenue_since_last_funding: 0,
-            historical_oracle_data: HistoricalOracleData {
-                last_oracle_price: oracle_price,
-                last_oracle_delay: oracle_delay,
-                last_oracle_price_twap,
-                last_oracle_price_twap_5min: oracle_price,
-                last_oracle_price_twap_ts: now,
-                ..HistoricalOracleData::default()
-            },
-            last_oracle_normalised_price: oracle_price,
-            last_oracle_conf_pct: 0,
-            last_oracle_reserve_price_spread_pct: 0, // todo
-            order_step_size,
-            order_tick_size,
-            min_order_size,
-            mm_oracle_price: 0,
-            max_slippage_ratio: 50,         // ~2%
-            max_fill_reserve_fraction: 100, // moves price ~2%
-            base_spread,
-            long_spread: 0,
-            short_spread: 0,
-            max_spread,
-            last_bid_price_twap: init_reserve_price,
-            last_ask_price_twap: init_reserve_price,
-            base_asset_amount_with_amm: 0,
-            base_asset_amount_long: 0,
-            base_asset_amount_short: 0,
-            quote_asset_amount: 0,
-            quote_entry_amount_long: 0,
-            quote_entry_amount_short: 0,
-            quote_break_even_amount_long: 0,
-            quote_break_even_amount_short: 0,
-            max_open_interest,
-            mark_std: 0,
-            oracle_std: 0,
-            volume_24h: 0,
-            long_intensity_volume: 0,
-            mm_oracle_slot: 0,
-            short_intensity_volume: 0,
-            last_trade_ts: now,
-            curve_update_intensity,
-            fee_pool: PoolBalance::default(),
-            base_asset_amount_per_lp: 0,
-            quote_asset_amount_per_lp: 0,
-            last_update_slot: clock_slot,
-
-            // lp stuff
-            base_asset_amount_with_unsettled_lp: 0,
-            user_lp_shares: 0,
-            amm_jit_intensity,
-
-            last_oracle_valid: false,
-            target_base_asset_amount_per_lp: 0,
-            per_lp_base: 0,
-            oracle_slot_delay_override: -1,
-            oracle_low_risk_slot_delay_override: 0,
-            amm_spread_adjustment: 0,
-            mm_oracle_sequence_id: 0,
-            net_unsettled_funding_pnl: 0,
-            quote_asset_amount_with_unsettled_lp: 0,
-            reference_price_offset: 0,
-            amm_inventory_spread_adjustment: 0,
-            reference_price_offset_deadband_pct: 0,
-            padding: [0; 2],
-            last_funding_oracle_twap: 0,
-        },
+    // Initialize field-by-field to avoid large stack allocation
+    perp_market.contract_type = ContractType::Perpetual;
+    perp_market.contract_tier = contract_tier;
+    perp_market.status = if active_status {
+        MarketStatus::Active
+    } else {
+        MarketStatus::Initialized
     };
+    perp_market.name = name;
+    perp_market.pubkey = *perp_market_pubkey;
+    perp_market.market_index = market_index;
+    perp_market.margin_ratio_initial = margin_ratio_initial;
+    perp_market.margin_ratio_maintenance = margin_ratio_maintenance;
+    perp_market.imf_factor = imf_factor;
+    perp_market.next_fill_record_id = 1;
+    perp_market.next_funding_rate_record_id = 1;
+    perp_market.next_curve_record_id = 1;
+    perp_market.insurance_claim = InsuranceClaim {
+        max_revenue_withdraw_per_period,
+        quote_max_insurance,
+        ..InsuranceClaim::default()
+    };
+    perp_market.unrealized_pnl_maintenance_asset_weight = SPOT_WEIGHT_PRECISION.cast()?;
+    perp_market.liquidator_fee = liquidator_fee;
+    perp_market.if_liquidation_fee = if_liquidation_fee;
+    perp_market.quote_spot_market_index = QUOTE_SPOT_MARKET_INDEX;
+    perp_market.fuel_boost_taker = 1;
+    perp_market.fuel_boost_maker = 1;
+    perp_market.lp_fee_transfer_scalar = 1;
+    perp_market.lp_pool_id = lp_pool_id;
+
+    // Initialize AMM field-by-field
+    perp_market.amm.oracle = *ctx.accounts.oracle.key;
+    perp_market.amm.oracle_source = oracle_source;
+    perp_market.amm.base_asset_reserve = amm_base_asset_reserve;
+    perp_market.amm.quote_asset_reserve = amm_quote_asset_reserve;
+    perp_market.amm.terminal_quote_asset_reserve = amm_quote_asset_reserve;
+    perp_market.amm.ask_base_asset_reserve = amm_base_asset_reserve;
+    perp_market.amm.ask_quote_asset_reserve = amm_quote_asset_reserve;
+    perp_market.amm.bid_base_asset_reserve = amm_base_asset_reserve;
+    perp_market.amm.bid_quote_asset_reserve = amm_quote_asset_reserve;
+    perp_market.amm.last_funding_rate_ts = now;
+    perp_market.amm.funding_period = amm_periodicity;
+    perp_market.amm.last_mark_price_twap = init_reserve_price;
+    perp_market.amm.last_mark_price_twap_5min = init_reserve_price;
+    perp_market.amm.last_mark_price_twap_ts = now;
+    perp_market.amm.sqrt_k = amm_base_asset_reserve;
+    perp_market.amm.concentration_coef = concentration_coef;
+    perp_market.amm.min_base_asset_reserve = min_base_asset_reserve;
+    perp_market.amm.max_base_asset_reserve = max_base_asset_reserve;
+    perp_market.amm.peg_multiplier = amm_peg_multiplier;
+    perp_market.amm.historical_oracle_data = HistoricalOracleData {
+        last_oracle_price: oracle_price,
+        last_oracle_delay: oracle_delay,
+        last_oracle_price_twap,
+        last_oracle_price_twap_5min: oracle_price,
+        last_oracle_price_twap_ts: now,
+        ..HistoricalOracleData::default()
+    };
+    perp_market.amm.last_oracle_normalised_price = oracle_price;
+    perp_market.amm.order_step_size = order_step_size;
+    perp_market.amm.order_tick_size = order_tick_size;
+    perp_market.amm.min_order_size = min_order_size;
+    perp_market.amm.max_slippage_ratio = 50;
+    perp_market.amm.max_fill_reserve_fraction = 100;
+    perp_market.amm.base_spread = base_spread;
+    perp_market.amm.max_spread = max_spread;
+    perp_market.amm.last_bid_price_twap = init_reserve_price;
+    perp_market.amm.last_ask_price_twap = init_reserve_price;
+    perp_market.amm.max_open_interest = max_open_interest;
+    perp_market.amm.last_trade_ts = now;
+    perp_market.amm.curve_update_intensity = curve_update_intensity;
+    perp_market.amm.last_update_slot = clock_slot;
+    perp_market.amm.amm_jit_intensity = amm_jit_intensity;
+    perp_market.amm.oracle_slot_delay_override = -1;
 
     safe_increment!(state.number_of_markets, 1);
 
@@ -5266,25 +5227,11 @@ pub struct InitializeSpotMarket<'info> {
         mint::token_program = token_program,
     )]
     pub spot_market_mint: Box<InterfaceAccount<'info, Mint>>,
-    #[account(
-        init,
-        seeds = [b"spot_market_vault".as_ref(), state.number_of_spot_markets.to_le_bytes().as_ref()],
-        bump,
-        payer = admin,
-        space = get_vault_len(&spot_market_mint)?,
-        owner = token_program.key()
-    )]
-    /// CHECK: checked in `initialize_spot_market`
+    #[account(mut)]
+    /// CHECK: created via CPI in handler to reduce stack usage
     pub spot_market_vault: AccountInfo<'info>,
-    #[account(
-        init,
-        seeds = [b"insurance_fund_vault".as_ref(), state.number_of_spot_markets.to_le_bytes().as_ref()],
-        bump,
-        payer = admin,
-        space = get_vault_len(&spot_market_mint)?,
-        owner = token_program.key()
-    )]
-    /// CHECK: checked in `initialize_spot_market`
+    #[account(mut)]
+    /// CHECK: created via CPI in handler to reduce stack usage
     pub insurance_fund_vault: AccountInfo<'info>,
     #[account(
         constraint = state.signer.eq(&drift_signer.key())

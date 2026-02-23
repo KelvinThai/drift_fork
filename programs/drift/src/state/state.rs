@@ -264,65 +264,71 @@ pub struct OrderFillerRewardStructure {
 impl FeeStructure {
     pub fn perps_default() -> Self {
         let mut fee_tiers = [FeeTier::default(); 10];
+        // Tier 0: Default — taker 5bps, maker -2bps rebate
         fee_tiers[0] = FeeTier {
-            fee_numerator: 100,
-            fee_denominator: FEE_DENOMINATOR, // 10 bps
+            fee_numerator: 50,
+            fee_denominator: FEE_DENOMINATOR, // 5 bps taker fee
             maker_rebate_numerator: 20,
-            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
+            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps maker rebate
             referrer_reward_numerator: 15,
             referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
             referee_fee_numerator: 5,
             referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
         };
+        // Tier 1: taker 4.5bps
         fee_tiers[1] = FeeTier {
-            fee_numerator: 90,
-            fee_denominator: FEE_DENOMINATOR, // 8 bps
+            fee_numerator: 45,
+            fee_denominator: FEE_DENOMINATOR, // 4.5 bps
             maker_rebate_numerator: 20,
             maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
             referrer_reward_numerator: 15,
-            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
+            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR,
             referee_fee_numerator: 5,
-            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
+            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR,
         };
+        // Tier 2: taker 4bps
         fee_tiers[2] = FeeTier {
-            fee_numerator: 80,
-            fee_denominator: FEE_DENOMINATOR, // 6 bps
-            maker_rebate_numerator: 20,
-            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
-            referrer_reward_numerator: 15,
-            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
-            referee_fee_numerator: 5,
-            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
-        };
-        fee_tiers[3] = FeeTier {
-            fee_numerator: 70,
-            fee_denominator: FEE_DENOMINATOR, // 5 bps
-            maker_rebate_numerator: 20,
-            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
-            referrer_reward_numerator: 15,
-            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
-            referee_fee_numerator: 5,
-            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
-        };
-        fee_tiers[4] = FeeTier {
-            fee_numerator: 60,
+            fee_numerator: 40,
             fee_denominator: FEE_DENOMINATOR, // 4 bps
             maker_rebate_numerator: 20,
             maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
             referrer_reward_numerator: 15,
-            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
+            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR,
             referee_fee_numerator: 5,
-            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
+            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR,
         };
-        fee_tiers[5] = FeeTier {
-            fee_numerator: 50,
+        // Tier 3: taker 3.5bps
+        fee_tiers[3] = FeeTier {
+            fee_numerator: 35,
             fee_denominator: FEE_DENOMINATOR, // 3.5 bps
             maker_rebate_numerator: 20,
             maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
             referrer_reward_numerator: 15,
-            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 15% of taker fee
+            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR,
             referee_fee_numerator: 5,
-            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR, // 5%
+            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR,
+        };
+        // Tier 4: taker 3bps
+        fee_tiers[4] = FeeTier {
+            fee_numerator: 30,
+            fee_denominator: FEE_DENOMINATOR, // 3 bps
+            maker_rebate_numerator: 20,
+            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
+            referrer_reward_numerator: 15,
+            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR,
+            referee_fee_numerator: 5,
+            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR,
+        };
+        // Tier 5: taker 2.5bps
+        fee_tiers[5] = FeeTier {
+            fee_numerator: 25,
+            fee_denominator: FEE_DENOMINATOR, // 2.5 bps
+            maker_rebate_numerator: 20,
+            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
+            referrer_reward_numerator: 15,
+            referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR,
+            referee_fee_numerator: 5,
+            referee_fee_denominator: FEE_PERCENTAGE_DENOMINATOR,
         };
         FeeStructure {
             fee_tiers,
@@ -339,10 +345,10 @@ impl FeeStructure {
     pub fn spot_default() -> Self {
         let mut fee_tiers = [FeeTier::default(); 10];
         fee_tiers[0] = FeeTier {
-            fee_numerator: 100,
-            fee_denominator: FEE_DENOMINATOR, // 10 bps
+            fee_numerator: 50,
+            fee_denominator: FEE_DENOMINATOR, // 5 bps taker fee
             maker_rebate_numerator: 20,
-            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps
+            maker_rebate_denominator: FEE_DENOMINATOR, // 2bps maker rebate
             referrer_reward_numerator: 0,
             referrer_reward_denominator: FEE_PERCENTAGE_DENOMINATOR, // 0% of taker fee
             referee_fee_numerator: 0,

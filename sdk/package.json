@@ -1,14 +1,14 @@
 {
-	"name": "@drift-labs/sdk",
-	"version": "2.158.0-beta.0",
+	"name": "@custom-perp-dex/sdk",
+	"version": "0.1.0",
 	"main": "lib/node/index.js",
 	"types": "lib/node/index.d.ts",
 	"module": "./lib/browser/index.js",
-	"author": "crispheaney",
-	"homepage": "https://www.drift.trade/",
+	"author": "kelvinthai",
+	"homepage": "",
 	"repository": {
 		"type": "git",
-		"url": "git@github.com:drift-labs/protocol-v2.git"
+		"url": ""
 	},
 	"scripts": {
 		"lint": "eslint './**/*.{ts,tsx}' --quiet --format unix",
@@ -105,7 +105,7 @@
 	},
 	"description": "SDK for Drift Protocol",
 	"engines": {
-		"node": "^24.0.0"
+		"node": ">=18.0.0"
 	},
 	"resolutions": {
 		"@solana/web3.js": "1.98.0",
