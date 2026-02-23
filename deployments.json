@@ -1,0 +1,66 @@
+{
+  "program": {
+    "id": "6prdU12bH7QLTHoNPhA3RF1yzSjrduLQg45JQgCMJ1ko",
+    "owner": "BPFLoaderUpgradeab1e11111111111111111111111",
+    "programDataAddress": "2CXjjQ11xSnLr84kqNNLwLpMe5FwUF5Nnt1oiwuBEYE5",
+    "authority": "7XAMFnYGKtJDqATNycQ6JQ7CwvFazrrtmmwn1UHSLQGr",
+    "keypairPath": "keys/program-keypair.json",
+    "adminKeypairPath": "keys/admin-keypair.json",
+    "binaryPath": "target/deploy/drift.so"
+  },
+  "networks": {
+    "devnet": {
+      "cluster": "https://api.devnet.solana.com",
+      "lastDeployedSlot": 444066783,
+      "lastDeployedAt": "2025-02-01T00:00:00Z",
+      "dataLength": 5580272,
+      "balanceSOL": 38.84
+    }
+  },
+  "markets": {
+    "perp": [
+      {
+        "index": 0,
+        "name": "SOL-PERP",
+        "oracle": "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE",
+        "oracleSource": "PYTH_PULL",
+        "status": "Active"
+      },
+      {
+        "index": 1,
+        "name": "BTC-PERP",
+        "oracle": "4cSM2e6rvbGQUFiJbqytoVMi5GgghSMr8LwVrT9VPSPo",
+        "oracleSource": "PYTH_PULL",
+        "status": "Active"
+      },
+      {
+        "index": 2,
+        "name": "ETH-PERP",
+        "oracle": "42amVS4KgzR9rA28tkVYqVXjq9Qa8dcZQMbH5EYFX6XC",
+        "oracleSource": "PYTH_PULL",
+        "status": "Active"
+      }
+    ],
+    "spot": [
+      {
+        "index": 0,
+        "name": "USDC",
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "oracle": null,
+        "oracleSource": "QUOTE_ASSET",
+        "status": "Active"
+      }
+    ]
+  },
+  "oracles": {
+    "pythReceiver": "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ"
+  },
+  "deployHistory": [
+    {
+      "slot": 444066783,
+      "network": "devnet",
+      "description": "Latest program deploy with SOL/BTC/ETH perp markets and USDC spot",
+      "commitHash": ""
+    }
+  ]
+}
