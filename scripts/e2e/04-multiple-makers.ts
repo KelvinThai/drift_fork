@@ -140,8 +140,10 @@ async function main() {
 	}
 
 	// 10. Fill #2: taker remaining vs maker #2
+	//     Re-align AMM after fill #1 (fill shifts AMM reserves → PriceBandsBreached)
 	console.log('\n--- Fill #2: taker vs maker #2 ---');
 	await sleep(2000);
+	await setupMarket(ctx.client, SOL_PERP_MARKET_INDEX, 150);
 	await ctx.client.fetchAccounts();
 	await maker2.client.fetchAccounts();
 	await taker.client.fetchAccounts();
