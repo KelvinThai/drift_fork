@@ -40,7 +40,8 @@ export function buildMakerInfo(
 }
 
 /**
- * Execute a direct fill: filler matches taker order against a maker.
+ * Execute a direct fill: filler matches taker order against maker(s).
+ * Accepts a single MakerInfo or an array for multi-maker fills.
  * Returns true if the fill succeeded.
  */
 export async function directFill(
@@ -48,7 +49,7 @@ export async function directFill(
 	takerUserPubkey: PublicKey,
 	takerUserAccount: any,
 	takerOrder: any,
-	makerInfo?: MakerInfo
+	makerInfo?: MakerInfo | MakerInfo[]
 ): Promise<boolean> {
 	console.log('\n--- Direct fill ---');
 	if (takerOrder) {
@@ -56,9 +57,10 @@ export async function directFill(
 			`  Taker order: id=${takerOrder.orderId}, price=${takerOrder.price.toString()}`
 		);
 	}
-	if (makerInfo) {
+	const makers = Array.isArray(makerInfo) ? makerInfo : makerInfo ? [makerInfo] : [];
+	for (const m of makers) {
 		console.log(
-			`  Maker order: id=${makerInfo.order.orderId}, price=${makerInfo.order.price.toString()}`
+			`  Maker order: id=${m.order.orderId}, price=${m.order.price.toString()}`
 		);
 	}
 
@@ -70,7 +72,7 @@ export async function directFill(
 				marketIndex: takerOrder.marketIndex,
 				orderId: takerOrder.orderId,
 			},
-			makerInfo
+			makers.length > 0 ? makers : undefined
 		);
 		console.log(`  Fill transaction sent. Tx: ${fillTx}`);
 		await sleep(2000);

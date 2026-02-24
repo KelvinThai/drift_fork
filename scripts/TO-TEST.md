@@ -17,7 +17,7 @@ Tracking all scenarios to test against the devnet deployment.
   Taker places market order with no resting maker; filler matches against AMM
 - [x] **3. Partial fills** — `e2e/03-partial-fills.ts`
   Maker has 1.0 SOL ask, taker buys 0.3 SOL; verify partial fill + remaining order
-- [ ] **4. Multiple makers** — `e2e/04-multiple-makers.ts`
+- [x] **4. Multiple makers** — `e2e/04-multiple-makers.ts`
   Taker order fills across 2-3 makers at different price levels
 - [ ] **5. JIT auction fill** — `e2e/05-jit-auction-fill.ts`
   Taker places market order with auction params; maker provides JIT liquidity during auction window
