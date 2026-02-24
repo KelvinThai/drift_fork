@@ -11,7 +11,7 @@ import {
 	PRICE_PRECISION,
 	ZERO,
 	ContractTier,
-} from '../sdk/src';
+} from '../../sdk/src';
 import fs from 'fs';
 
 // ============================================================================

@@ -7,11 +7,11 @@ import {
 	initialize,
 	OracleSource,
 	PRICE_PRECISION,
-} from '../sdk/src';
+} from '../../sdk/src';
 import {
 	getPrelaunchOraclePublicKey,
 	getAmmCachePublicKey,
-} from '../sdk/src/addresses/pda';
+} from '../../sdk/src/addresses/pda';
 import fs from 'fs';
 
 // ============================================================================

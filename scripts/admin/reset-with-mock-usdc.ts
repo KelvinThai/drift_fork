@@ -12,7 +12,7 @@ import {
 	PRICE_PRECISION,
 	ZERO,
 	ContractTier,
-} from '../sdk/src';
+} from '../../sdk/src';
 import { createMint } from '@solana/spl-token';
 import fs from 'fs';
 
