@@ -1,3 +1,4 @@
+import { BN } from '@coral-xyz/anchor';
 import { DriftClient, AdminClient, BASE_PRECISION } from '../../../sdk/src';
 
 export interface PositionInfo {
@@ -52,6 +53,34 @@ export async function assertPosition(
 
 	const ok = pos.side === expectedSide;
 	console.log(`    Expected: ${expectedSide} ${ok ? '-- PASS' : '-- FAIL'}`);
+	return ok;
+}
+
+/**
+ * Assert that an order has the expected remaining (unfilled) base amount.
+ * remaining = baseAssetAmount - baseAssetAmountFilled
+ * Returns true if the assertion passes.
+ */
+export function assertOrderRemaining(
+	order: any,
+	expectedRemaining: BN,
+	label: string
+): boolean {
+	if (!order) {
+		console.log(`\n  ${label}: Order not found`);
+		return false;
+	}
+
+	const remaining = order.baseAssetAmount.sub(order.baseAssetAmountFilled);
+	const filled = order.baseAssetAmountFilled;
+
+	console.log(`\n  ${label} order:`);
+	console.log(`    Total size: ${order.baseAssetAmount.toString()} (${order.baseAssetAmount.toNumber() / BASE_PRECISION.toNumber()} SOL)`);
+	console.log(`    Filled:     ${filled.toString()} (${filled.toNumber() / BASE_PRECISION.toNumber()} SOL)`);
+	console.log(`    Remaining:  ${remaining.toString()} (${remaining.toNumber() / BASE_PRECISION.toNumber()} SOL)`);
+
+	const ok = remaining.eq(expectedRemaining);
+	console.log(`    Expected remaining: ${expectedRemaining.toString()} ${ok ? '-- PASS' : '-- FAIL'}`);
 	return ok;
 }
 

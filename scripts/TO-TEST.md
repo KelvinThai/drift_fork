@@ -15,7 +15,7 @@ Tracking all scenarios to test against the devnet deployment.
   Maker SELL + taker BUY at same price, direct fill, verify positions
 - [x] **2. Market orders (taker vs AMM)** — `e2e/02-market-orders.ts`
   Taker places market order with no resting maker; filler matches against AMM
-- [ ] **3. Partial fills** — `e2e/03-partial-fills.ts`
+- [x] **3. Partial fills** — `e2e/03-partial-fills.ts`
   Maker has 1.0 SOL ask, taker buys 0.3 SOL; verify partial fill + remaining order
 - [ ] **4. Multiple makers** — `e2e/04-multiple-makers.ts`
   Taker order fills across 2-3 makers at different price levels
