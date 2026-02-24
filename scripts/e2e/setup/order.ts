@@ -5,6 +5,7 @@ import {
 	PositionDirection,
 	PostOnlyParams,
 	getLimitOrderParams,
+	getMarketOrderParams,
 } from '../../../sdk/src';
 
 /**
@@ -62,6 +63,57 @@ export async function placeLimitOrder(
 			`  Confirmed on-chain: orderId=${order.orderId}, ` +
 			`baseAmount=${order.baseAssetAmount.toString()}, ` +
 			`price=${order.price.toString()}`
+		);
+	}
+
+	return userOrderId;
+}
+
+export interface MarketOrderParams {
+	marketIndex: number;
+	direction: PositionDirection;
+	baseAssetAmount: BN;
+	price?: BN;
+	auctionStartPrice?: BN;
+	auctionEndPrice?: BN;
+	auctionDuration?: number;
+	userOrderId?: number;
+}
+
+/**
+ * Place a market order and verify it on-chain.
+ * Returns the order's userOrderId.
+ */
+export async function placeMarketOrder(
+	client: DriftClient | AdminClient,
+	params: MarketOrderParams
+): Promise<number> {
+	const userOrderId = params.userOrderId ?? Math.floor(Math.random() * 250) + 1;
+	const orderParams = getMarketOrderParams({
+		marketIndex: params.marketIndex,
+		direction: params.direction,
+		baseAssetAmount: params.baseAssetAmount,
+		price: params.price,
+		auctionStartPrice: params.auctionStartPrice,
+		auctionEndPrice: params.auctionEndPrice,
+		auctionDuration: params.auctionDuration,
+		userOrderId,
+	});
+
+	const tx = await client.placePerpOrder(orderParams);
+	const side = params.direction === PositionDirection.LONG ? 'BUY' : 'SELL';
+	console.log(`  Placed MARKET ${side} order (userOrderId=${userOrderId}). Tx: ${tx}`);
+
+	// Verify on-chain
+	await client.fetchAccounts();
+	const orders = client.getUserAccount()?.orders;
+	const order = orders?.find((o: any) => o.userOrderId === userOrderId);
+	if (order && !order.baseAssetAmount.isZero()) {
+		console.log(
+			`  Confirmed on-chain: orderId=${order.orderId}, ` +
+			`baseAmount=${order.baseAssetAmount.toString()}, ` +
+			`price=${order.price.toString()}, ` +
+			`auctionDuration=${order.auctionDuration}`
 		);
 	}
 

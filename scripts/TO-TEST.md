@@ -13,7 +13,7 @@ Tracking all scenarios to test against the devnet deployment.
 
 - [x] **1. Cross limit orders (maker/taker)** — `e2e/01-cross-limit-orders.ts`
   Maker SELL + taker BUY at same price, direct fill, verify positions
-- [ ] **2. Market orders (taker vs AMM)** — `e2e/02-market-orders.ts`
+- [x] **2. Market orders (taker vs AMM)** — `e2e/02-market-orders.ts`
   Taker places market order with no resting maker; filler matches against AMM
 - [ ] **3. Partial fills** — `e2e/03-partial-fills.ts`
   Maker has 1.0 SOL ask, taker buys 0.3 SOL; verify partial fill + remaining order
@@ -135,7 +135,7 @@ scripts/
 │   │   ├── verify.ts               # Check positions, PASS/FAIL assertion
 │   │   └── index.ts                # Barrel re-export
 │   ├── 01-cross-limit-orders.ts    # [x] Implemented
-│   ├── 02-market-orders.ts         # [ ] Stub
+│   ├── 02-market-orders.ts         # [x] Implemented
 │   ├── ...                         # [ ] Stubs (03-28)
 │   └── run-all.ts                  # Sequential test runner
 ├── TO-TEST.md                      # This file
