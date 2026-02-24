@@ -36,124 +36,18 @@ export const WRAPPED_SOL_MINT = new PublicKey(
 	'So11111111111111111111111111111111111111112'
 );
 
+// Custom Perp DEX — Only USDC collateral market deployed on-chain
+// USDC uses QUOTE_ASSET oracle source (no external oracle needed)
 export const DevnetSpotMarkets: SpotMarketConfig[] = [
 	{
 		symbol: 'USDC',
 		marketIndex: 0,
 		poolId: 0,
-		oracle: new PublicKey('9VCioxmni2gDLv11qufWzT3RDERhQE4iY5Gf7NTfYyAV'),
-		oracleSource: OracleSource.PYTH_LAZER_STABLE_COIN,
-		mint: new PublicKey('8zGuJQqwhZafTah7Uc7Z4tXRnguqkn5KLFAP8oV6PHe2'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a',
-		pythLazerId: 7,
-	},
-	{
-		symbol: 'SOL',
-		marketIndex: 1,
-		poolId: 0,
-		oracle: new PublicKey('3m6i4RFWEDw2Ft4tFHPJtYgmpPe21k56M3FHeWYrgGBz'),
-		oracleSource: OracleSource.PYTH_LAZER,
-		mint: new PublicKey(WRAPPED_SOL_MINT),
-		precision: LAMPORTS_PRECISION,
-		precisionExp: LAMPORTS_EXP,
-		serumMarket: new PublicKey('8N37SsnTu8RYxtjrV9SStjkkwVhmU8aCWhLvwduAPEKW'),
-		phoenixMarket: new PublicKey(
-			'78ehDnHgbkFxqXZwdFxa8HK7saX58GymeX2wNGdkqYLp'
-		),
-		pythFeedId:
-			'0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d',
-		pythLazerId: 6,
-	},
-	{
-		symbol: 'BTC',
-		marketIndex: 2,
-		poolId: 0,
-		oracle: new PublicKey('486kr3pmFPfTsS4aZgcsQ7kS4i9rjMsYYZup6HQNSTT4'),
-		oracleSource: OracleSource.PYTH_PULL,
-		mint: new PublicKey('3BZPwbcqB5kKScF3TEXxwNfx5ipV13kbRVDvfVp5c6fv'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		serumMarket: new PublicKey('AGsmbVu3MS9u68GEYABWosQQCZwmLcBHu4pWEuBYH7Za'),
-		pythFeedId:
-			'0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
-		pythLazerId: 1,
-	},
-	{
-		symbol: 'PYUSD',
-		marketIndex: 3,
-		poolId: 0,
-		oracle: new PublicKey('HpMoKp3TCd3QT4MWYUKk2zCBwmhr5Df45fB6wdxYqEeh'),
-		oracleSource: OracleSource.PYTH_PULL,
-		mint: new PublicKey('GLfF72ZCUnS6N9iDJw8kedHzd6WFVf3VbpwdKKy76FRk'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0xc1da1b73d7f01e7ddd54b3766cf7fcd644395ad14f70aa706ec5384c59e76692',
-	},
-	{
-		symbol: 'Bonk',
-		marketIndex: 4,
-		poolId: 0,
-		oracle: new PublicKey('GojbSnJuPdKDT1ZuHuAM5t9oz6bxTo1xhUKpTua2F72p'),
-		oracleSource: OracleSource.PYTH_PULL,
-		mint: new PublicKey('7SekVZDmKCCDgTP8m6Hk4CfexFSru9RkwDCczmcwcsP6'),
-		precision: new BN(10).pow(FIVE),
-		precisionExp: FIVE,
-		pythFeedId:
-			'0x72b021217ca3fe68922a19aaf990109cb9d84e9ad004b4d2025ad6f529314419',
-		pythLazerId: 9,
-	},
-	{
-		symbol: 'JLP',
-		marketIndex: 5,
-		poolId: 1,
-		oracle: new PublicKey('5Mb11e5rt1Sp6A286B145E4TmgMzsM2UX9nCF2vas5bs'),
-		oracleSource: OracleSource.PYTH_PULL,
-		mint: new PublicKey('HGe9FejFyhWSx6zdvx2RjynX7rmoEXFiJiLU437NXemZ'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0xc811abc82b4bad1f9bd711a2773ccaa935b03ecef974236942cec5e0eb845a3a',
-	},
-	{
-		symbol: 'USDC',
-		marketIndex: 6,
-		poolId: 1,
-		oracle: new PublicKey('En8hkHLkRe9d9DraYmBTrus518BvmVH448YcvmrFM6Ce'),
-		oracleSource: OracleSource.PYTH_STABLE_COIN_PULL,
-		mint: new PublicKey('8zGuJQqwhZafTah7Uc7Z4tXRnguqkn5KLFAP8oV6PHe2'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a',
-		pythLazerId: 7,
-	},
-	{
-		symbol: 'GLXY',
-		marketIndex: 7,
-		poolId: 2,
-		oracle: new PublicKey('4wFrjUQHzRBc6qjVtMDbt28aEVgn6GaNiWR6vEff4KxR'),
-		oracleSource: OracleSource.Prelaunch,
-		mint: new PublicKey('2vVfXmcWXEaFzp7iaTVnQ4y1gR41S6tJQQMo1S5asJyC'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0x67e031d1723e5c89e4a826d80b2f3b41a91b05ef6122d523b8829a02e0f563aa',
-	},
-	{
-		symbol: 'GLXY',
-		marketIndex: 8,
-		poolId: 2,
-		oracle: new PublicKey('4wFrjUQHzRBc6qjVtMDbt28aEVgn6GaNiWR6vEff4KxR'),
-		oracleSource: OracleSource.Prelaunch,
-		mint: new PublicKey('2vVfXmcWXEaFzp7iaTVnQ4y1gR41S6tJQQMo1S5asJyC'),
-		precision: new BN(10).pow(SIX),
-		precisionExp: SIX,
-		pythFeedId:
-			'0x67e031d1723e5c89e4a826d80b2f3b41a91b05ef6122d523b8829a02e0f563aa',
+		oracle: PublicKey.default,
+		oracleSource: OracleSource.QUOTE_ASSET,
+		mint: new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+		precision: QUOTE_PRECISION,
+		precisionExp: QUOTE_PRECISION_EXP,
 	},
 ];
 
