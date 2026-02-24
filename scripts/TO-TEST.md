@@ -19,7 +19,7 @@ Tracking all scenarios to test against the devnet deployment.
   Maker has 1.0 SOL ask, taker buys 0.3 SOL; verify partial fill + remaining order
 - [x] **4. Multiple makers** — `e2e/04-multiple-makers.ts`
   Taker order fills across 2-3 makers at different price levels
-- [ ] **5. JIT auction fill** — `e2e/05-jit-auction-fill.ts`
+- [x] **5. JIT auction fill** — `e2e/05-jit-auction-fill.ts`
   Taker places market order with auction params; maker provides JIT liquidity during auction window
 - [ ] **6. Post-only rejection** — `e2e/06-post-only-rejection.ts`
   Maker places post-only order that would immediately cross; verify rejection
