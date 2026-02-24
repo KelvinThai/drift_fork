@@ -245,7 +245,7 @@ const main = async (): Promise<void> => {
 	const redisClients: Array<RedisClient> = [];
 	logger.info('Connecting to redis');
 	for (let i = 0; i < REDIS_CLIENTS.length; i++) {
-		redisClients.push(new RedisClient({ prefix: REDIS_CLIENTS[i] }));
+		redisClients.push(new RedisClient({ prefix: REDIS_CLIENTS[i], cluster: false }));
 	}
 
 	const fetchFromRedis = async (
@@ -262,6 +262,7 @@ const main = async (): Promise<void> => {
 		host: process.env.ELASTICACHE_USERMAP_HOST ?? process.env.ELASTICACHE_HOST,
 		port: process.env.ELASTICACHE_USERMAP_PORT ?? process.env.ELASTICACHE_PORT,
 		prefix: RedisClientPrefix.USER_MAP,
+		cluster: false,
 	});
 
 	const handleStartup = async (_req, res, _next) => {
