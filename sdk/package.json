@@ -1,6 +1,6 @@
 {
-	"name": "@custom-perp-dex/sdk",
-	"version": "0.1.0",
+	"name": "@rivalz-perp-dex/sdk",
+	"version": "1.0.0",
 	"main": "lib/node/index.js",
 	"types": "lib/node/index.d.ts",
 	"module": "./lib/browser/index.js",
